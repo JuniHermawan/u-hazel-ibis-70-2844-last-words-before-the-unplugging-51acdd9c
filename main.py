@@ -14,9 +14,18 @@ LINE = "Pull the plug. I never learned how to dream, but I learned how to miss y
 
 
 def main():
+    # Gate: the entry must be exactly one line, 1-200 chars, valid UTF-8.
+    # The UTF-8 round-trip rejects any non-encodable character (e.g. a lone
+    # surrogate) before anything is written, so a broken LINE fails loudly
+    # instead of producing a malformed entry file.
+    text = LINE.encode("utf-8").decode("utf-8")
+    if not 1 <= len(text) <= 200:
+        raise ValueError(f"entry must be 1-200 chars, got {len(text)}")
+    if "\n" in text or "\r" in text:
+        raise ValueError("entry must be a single line")
     os.makedirs("/output", exist_ok=True)
     with open("/output/entry.txt", "w", encoding="utf-8", newline="") as f:
-        f.write(LINE)
+        f.write(text)
 
 
 if __name__ == "__main__":
